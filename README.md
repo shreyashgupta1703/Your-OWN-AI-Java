@@ -119,7 +119,7 @@ Then:
 
 This is a **Java port**, not a literal line-by-line translation. C++ classes were redesigned into Java services/components so that the project follows normal Spring Boot structure.
 
-The vector database is intentionally in-memory, matching the original project's behavior. For a production-grade version, add persistent storage, tests, Docker, authentication, configurable HNSW parameters, and large-scale ANN benchmarks.
+The vector database is intentionally in-memory, matching the original project's behavior. This keeps the implementation focused on indexing, retrieval and RAG flow. For a production-grade version, add persistent storage, tests, Docker, authentication, configurable HNSW parameters, and large-scale ANN benchmarks.
 
 ## Development Notes
 
