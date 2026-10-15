@@ -12,9 +12,9 @@ Java/Spring Boot port of the original **Your-OWN-AI / VectorDB** project.
 - Document chunking
 - Ollama embeddings using `nomic-embed-text`
 - Local LLM generation using `llama3.2`
-- End-to-end RAG pipeline
+- End-to-end local RAG pipeline
 - HNSW graph statistics
-- Search/benchmark web UI
+- Interactive search/benchmark web UI
 - Java 17 + Spring Boot
 
 ## Architecture
