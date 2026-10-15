@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>VectorDB — Java HNSW + RAG</title>
+<style>
+body{margin:0;background:#080812;color:#d8def8;font:14px system-ui,sans-serif}
+main{max-width:1100px;margin:auto;padding:28px}
+h1{color:#8b7cff} .grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.card{background:#111121;border:1px solid #252542;border-radius:12px;padding:18px}
+input,textarea,select,button{width:100%;box-sizing:border-box;padding:10px;margin:5px 0;background:#080812;color:#ddd;border:1px solid #303052;border-radius:7px}
+button{cursor:pointer;background:#6558e8;border:0}.row{display:flex;gap:8px}.row>*{flex:1}
+pre{white-space:pre-wrap;line-height:1.5}.result{padding:10px;border:1px solid #292944;border-radius:8px;margin:7px 0}
+small{color:#888}
+</style>
+</head>
+<body>
+<main>
+<h1>VectorDB — Java + HNSW + RAG</h1>
+<p>HNSW + KD-Tree + Brute Force + Ollama RAG implemented in Java/Spring Boot.</p>
+
+<div class="grid">
+<section class="card">
+<h2>Semantic Search</h2>
+<input id="q" placeholder="binary tree, sushi, basketball">
+<div class="row">
+<select id="algo"><option>hnsw</option><option>kdtree</option><option>bruteforce</option></select>
+<select id="metric"><option>cosine</option><option>euclidean</option><option>manhattan</option></select>
+</div>
+<input id="k" type="number" value="5" min="1" max="10">
+<button onclick="search()">SEARCH</button>
+<div id="results"></div>
+</section>
+
+<section class="card">
+<h2>Benchmark</h2>
+<button onclick="benchmark()">COMPARE ALL ALGORITHMS</button>
+<pre id="bench"></pre>
+<h2>HNSW Graph</h2><pre id="graph"></pre>
+</section>
+
+<section class="card">
+<h2>Insert Document</h2>
+<input id="title" placeholder="Document title">
+<textarea id="text" rows="8" placeholder="Paste notes / documentation..."></textarea>
+<button onclick="insertDoc()">EMBED & INSERT</button>
+<pre id="docStatus"></pre>
+</section>
+
+<section class="card">
+<h2>Ask AI</h2>
+<textarea id="question" rows="4" placeholder="Ask something about your documents"></textarea>
+<input id="ragK" type="number" value="3" min="1" max="10">
+<button onclick="ask()">ASK AI</button>
+<pre id="answer"></pre>
+</section>
+</div>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+function embed16(s){
+ const kw={
+ cs:['algorithm','data','tree','graph','array','linked','hash','stack','queue','sort','binary','dynamic','programming','recursion','complexity'],
+ math:['calculus','matrix','probability','theorem','integral','derivative','linear','algebra','equation','prime','combinatorics'],
+ food:['food','pizza','sushi','ramen','pasta','recipe','cook','eat','restaurant','dish','ingredient','spice','noodle'],
+ sports:['basketball','football','tennis','chess','swimming','sport','game','score','player']
+ };
+ let v=new Array(16).fill(.05),t=s.toLowerCase();
+ Object.entries(kw).forEach(([cat,words],ci)=>words.forEach((w,i)=>{
+   if(t.includes(w)) v[ci*4+(i%4)]+=.65;
+ }));
+ return v;
+}
+async function search(){
+ const v=embed16($('q').value);
+ const p=new URLSearchParams({v:v.join(','),k:$('k').value,algo:$('algo').value,metric:$('metric').value});
+ const d=await fetch('/search?'+p).then(r=>r.json());
+ $('results').innerHTML=(d.results||[]).map((x,i)=>`<div class="result"><b>#${i+1} ${x.metadata}</b><br><small>${x.category} · distance ${x.distance.toFixed(5)}</small></div>`).join('');
+}
+async function benchmark(){
+ const v=embed16($('q').value||'binary tree algorithm');
+ const p=new URLSearchParams({v:v.join(','),k:5,metric:$('metric').value});
+ $('bench').textContent=JSON.stringify(await fetch('/benchmark?'+p).then(r=>r.json()),null,2);
+ $('graph').textContent=JSON.stringify(await fetch('/hnsw-info').then(r=>r.json()),null,2);
+}
+async function insertDoc(){
+ const d=await fetch('/doc/insert',{method:'POST',headers:{'Content-Type':'application/json'},
+ body:JSON.stringify({title:$('title').value,text:$('text').value})}).then(r=>r.json());
+ $('docStatus').textContent=JSON.stringify(d,null,2);
+}
+async function ask(){
+ const d=await fetch('/doc/ask',{method:'POST',headers:{'Content-Type':'application/json'},
+ body:JSON.stringify({question:$('question').value,k:+$('ragK').value})}).then(r=>r.json());
+ $('answer').textContent=d.error||('MODEL: '+d.model+'\n\n'+d.answer+'\n\nRETRIEVED:\n'+(d.contexts||[]).map(x=>x.title+' ('+x.distance.toFixed(3)+')').join('\n'));
+}
+benchmark();
+</script>
+</body>
+</html>
