@@ -126,3 +126,7 @@ The vector database is intentionally in-memory, matching the original project's 
 - Java 17 target with Spring Boot 3.5.6
 - Local LLM integration through Ollama
 - Vector indexes are implemented in-memory
+
+## Resume Highlights
+
+This project demonstrates custom vector search implementation, Spring Boot REST API design, local embeddings and LLM-powered retrieval augmented generation.
