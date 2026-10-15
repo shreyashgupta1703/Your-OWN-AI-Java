@@ -1,3 +1,7 @@
+## 🚀 Live Demo
+
+👉 **[Open Your OWN AI](https://your-own-ai-java.onrender.com)**
+
 # Your OWN AI — Java VectorDB + RAG
 
 Java/Spring Boot port of the original **Your-OWN-AI / VectorDB** project.
